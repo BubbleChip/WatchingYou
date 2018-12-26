@@ -66,7 +66,7 @@ void AWatchingYouCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &AWatchingYouCharacter::LookUpAtRate);
 
-	PlayerInputComponent->BindAction("Attack", this, &AWatchingYouCharacter::Attack);
+	PlayerInputComponent->BindAction("Attack", EInputEvent::IE_Pressed, this, &AWatchingYouCharacter::Attack);
 
 }
 
