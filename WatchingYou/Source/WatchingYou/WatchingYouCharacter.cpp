@@ -70,6 +70,11 @@ void AWatchingYouCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 
 }
 
+void AWatchingYouCharacter::AttackJudgment()
+{
+	GetCharacterMovement()->Launch(
+}
+
 void AWatchingYouCharacter::TurnAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
