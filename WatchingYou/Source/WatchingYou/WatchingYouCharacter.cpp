@@ -72,7 +72,8 @@ void AWatchingYouCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 
 void AWatchingYouCharacter::AttackJudgment()
 {
-	GetCharacterMovement()->Launch(
+	FVector Temp = GetActorForwardVector() * 500.0f;
+	GetCharacterMovement()->Launch(Temp);
 }
 
 void AWatchingYouCharacter::TurnAtRate(float Rate)
@@ -89,7 +90,10 @@ void AWatchingYouCharacter::LookUpAtRate(float Rate)
 
 void AWatchingYouCharacter::Attack()
 {
-
+	if (AttackAnimMontage)
+	{
+		PlayAnimMontage(AttackAnimMontage);
+	}
 }
 
 void AWatchingYouCharacter::MoveForward(float Value)

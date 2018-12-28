@@ -25,6 +25,9 @@ class AWatchingYouCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = UserData, meta = (AllowPrivateAccess = "true"))
 		float RunSpeed = 600.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+		class UAnimMontage* AttackAnimMontage;
+
 public:
 	AWatchingYouCharacter();
 
