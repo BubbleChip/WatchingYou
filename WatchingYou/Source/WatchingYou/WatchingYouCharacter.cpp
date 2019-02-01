@@ -5,9 +5,12 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Animation/AnimInstance.h"
+#include "DrawDebugHelpers.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AWatchingYouCharacter
@@ -70,10 +73,54 @@ void AWatchingYouCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 
 }
 
+void AWatchingYouCharacter::Attack()
+{
+	if (AttackAnimMontage && !bIsAttacking)
+	{
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		SetActorRotation(YawRotation);
+
+		PlayAnimMontage(AttackAnimMontage);
+		GetCharacterMovement()->MaxWalkSpeed = 0.0f;
+		bIsAttacking = true;
+	}
+
+}
+
 void AWatchingYouCharacter::AttackJudgment()
 {
-	FVector Temp = GetActorForwardVector() * 500.0f;
-	GetCharacterMovement()->Launch(Temp);
+	FVector ActorLocation = GetActorLocation();
+	FVector Range = ActorLocation + GetActorForwardVector() * 500.0f;
+	FCollisionShape Collision = FCollisionShape::MakeSphere(75.0f);
+
+	TArray<FHitResult> OutResult;
+	GetWorld()->SweepMultiByChannel(OUT OutResult, ActorLocation, Range, FQuat::Identity,
+		ECollisionChannel::ECC_Pawn, Collision);
+
+	for (FHitResult Hit : OutResult)
+	{
+		if (Hit.Actor == this)
+		{
+			continue;
+		}
+		UE_LOG(LogTemp, Warning, TEXT("HitActor : %s, HitComp : %s"), *Hit.Actor->GetName(), *Hit.Component->GetName());
+		//AttackedEffect(Hit.Actor->GetActorLocation());
+		if (Hit.Actor != nullptr)
+		{
+			FDamageEvent DamageEvent;
+			Hit.Actor->TakeDamage(50.0f, DamageEvent, GetWorld()->GetFirstPlayerController(), this);
+		}
+	}
+
+	DrawDebugCylinder(GetWorld(), ActorLocation, Range, 75, 12, FColor::Green, true, 10.0f);
+}
+
+void AWatchingYouCharacter::AttackReset()
+{
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	bIsAttacking = false;
+
 }
 
 void AWatchingYouCharacter::TurnAtRate(float Rate)
@@ -88,17 +135,11 @@ void AWatchingYouCharacter::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
-void AWatchingYouCharacter::Attack()
-{
-	if (AttackAnimMontage)
-	{
-		PlayAnimMontage(AttackAnimMontage);
-	}
-}
+
 
 void AWatchingYouCharacter::MoveForward(float Value)
 {
-	if ((Controller != NULL) && (Value != 0.0f))
+	if ((Controller != NULL) && (Value != 0.0f) && !bIsAttacking)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -112,12 +153,12 @@ void AWatchingYouCharacter::MoveForward(float Value)
 
 void AWatchingYouCharacter::MoveRight(float Value)
 {
-	if ( (Controller != NULL) && (Value != 0.0f) )
+	if ((Controller != NULL) && (Value != 0.0f) && !bIsAttacking)
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
-	
+
 		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction

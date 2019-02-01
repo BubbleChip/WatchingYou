@@ -28,6 +28,10 @@ class AWatchingYouCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
 		class UAnimMontage* AttackAnimMontage;
 
+
+	bool bIsAttacking = false;
+
+
 public:
 	AWatchingYouCharacter();
 
@@ -80,5 +84,7 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 	void AttackJudgment();
+
+	void AttackReset();
 };
 
